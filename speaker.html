@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speaker Diarization</title>
+    <style>
+        body {
+            background-image: url('background_image.jpg'); /* Add your background image here */
+            background-size: cover;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 50%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        h1 {
+            margin-top: 50px;
+        }
+        form {
+            margin-top: 20px;
+        }
+        #audioFile {
+            margin-bottom: 10px;
+        }
+        #output {
+            margin-top: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Speaker Diarization</h1>
+        <form id="audioForm">
+            <input type="file" id="audioFile" name="file" accept=".wav, .mp3"><br>
+            <button type="button" onclick="transcribeAudio()">Transcribe</button>
+        </form>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function transcribeAudio() {
+            var formData = new FormData();
+            var fileInput = document.getElementById('audioFile');
+            var file = fileInput.files[0];
+            formData.append('file', file);
+
+            fetch('/transcribe', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                var outputDiv = document.getElementById('output');
+                outputDiv.innerHTML = '';
+
+                data.transcript.forEach(utterance => {
+                    var speaker = document.createElement('p');
+                    speaker.textContent = 'Speaker ' + utterance.speaker + ':';
+                    outputDiv.appendChild(speaker);
+
+                    var text = document.createElement('p');
+                    text.textContent = utterance.text;
+                    outputDiv.appendChild(text);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                var outputDiv = document.getElementById('output');
+                outputDiv.innerHTML = 'An error occurred. Please try again.';
+            });
+        }
+    </script>
+</body>
+</html>
